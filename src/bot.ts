@@ -76,12 +76,21 @@ privateChat.command("set").filter(owner_only, wrapper(set_chat_handler));
 privateChat.command("get").filter(owner_only, wrapper(get_chat_handler));
 privateChat.command("rem").filter(owner_only, wrapper(rem_chat_handler));
 
-privateChat
-    .on("msg:text")
-    .filter(
-        (ctx) => ctx.msg.forward_from?.username?.toLowerCase() === "botfather",
-        wrapper(bot_token_handler)
-    );
+privateChat.on("message", async (ctx) => {
+    // Пытаемся получить свойство forward_from через утверждение типа
+    const forwardFrom = (ctx.message as any).forward_from;
+
+    // Проверяем, существует ли свойство и является ли username "botfather"
+    if (forwardFrom && forwardFrom.username?.toLowerCase() === "botfather") {
+        // Обработка сообщений, пересланных от "botfather"
+        await bot_token_handler(ctx);
+    } else {
+        console.error(`Error in ${ctx.message}`);
+    }
+    // Другая логика обработки для сообщений, которые не пересланы или не от "botfather"
+});
+
+
 
 composer.on("msg", message_handler);
 
